@@ -30,14 +30,24 @@ export const register = async (req, res) => {
     // Create user
     const newUser = await User.add(name, email, hashedPassword, role);
 
+    // Create token
+    const token = generateToken({
+      userId: newUser.id,
+      email: newUser.email,
+      role: newUser.role,
+      status: newUser.status,
+    });
+
     res.status(201).json({
       success: true,
       message: "User registered successfully",
+      token,
       user: {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
+        status: newUser.status,
       },
     });
   } catch (error) {
@@ -85,6 +95,7 @@ export const login = async (req, res) => {
       userId: user.id,
       email: user.email,
       role: user.role,
+      status: user.status,
     });
 
     res.status(200).json({
@@ -96,6 +107,7 @@ export const login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        status: user.status,
       },
     });
   } catch (error) {

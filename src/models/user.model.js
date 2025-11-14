@@ -13,19 +13,26 @@ const runQuery = async (query, params = []) => {
 
 // Create users table
 const createTable = async () => {
-  const query = `
+  const createTableQuery = `
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       name VARCHAR(100) NOT NULL,
       email VARCHAR(255) UNIQUE NOT NULL,
       password VARCHAR(255) NOT NULL,
-      role VARCHAR(50) DEFAULT 'user',
+      role VARCHAR(50) DEFAULT 'sales_executive',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `;
 
+  // Add status column if it doesn't exist
+  const addStatusColumnQuery = `
+    ALTER TABLE users 
+    ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'active'
+  `;
+
   try {
-    await runQuery(query);
+    await runQuery(createTableQuery);
+    await runQuery(addStatusColumnQuery);
     console.log("Users table ready");
   } catch (error) {
     console.error("Error creating table:", error.message);
@@ -34,16 +41,23 @@ const createTable = async () => {
 
 const User = {
   // Add new user
-  add: async (name, email, password, role = "user") => {
+  // roles are like 'admin', 'manager', 'sales_executive', etc.
+  add: async (
+    name,
+    email,
+    password,
+    role = "sales_executive",
+    status = "active"
+  ) => {
     const query =
-      "INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING *";
-    const result = await runQuery(query, [name, email, password, role]);
+      "INSERT INTO users (name, email, password, role, status) VALUES ($1, $2, $3, $4, $5) RETURNING *";
+    const result = await runQuery(query, [name, email, password, role, status]);
     return result[0];
   },
 
   // Get all users
   getAll: async () => {
-    const query = "SELECT id, name, email, role, created_at FROM users";
+    const query = "SELECT id, name, email, role, status, created_at FROM users";
     return await runQuery(query);
   },
 
