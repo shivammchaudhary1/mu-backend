@@ -19,3 +19,5 @@ export const connectDB = async () => {
     console.error("Database connection failed:", err.message);
   }
 };
+
+export default pool;
