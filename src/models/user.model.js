@@ -74,6 +74,37 @@ const User = {
     const result = await runQuery(query, [id]);
     return result[0];
   },
+
+  // Get users by role
+  getByRole: async (role) => {
+    const query =
+      "SELECT id, name, email, role, status, created_at FROM users WHERE role = $1";
+    return await runQuery(query, [role]);
+  },
+
+  // Update user
+  update: async (id, updateData) => {
+    const fields = Object.keys(updateData);
+    const values = Object.values(updateData);
+
+    // Build SET clause dynamically
+    const setClause = fields
+      .map((field, index) => `${field} = $${index + 1}`)
+      .join(", ");
+
+    const query = `UPDATE users SET ${setClause} WHERE id = $${
+      fields.length + 1
+    } RETURNING id, name, email, role, status, created_at`;
+    const result = await runQuery(query, [...values, id]);
+    return result[0];
+  },
+
+  // Delete user
+  delete: async (id) => {
+    const query = "DELETE FROM users WHERE id = $1";
+    await runQuery(query, [id]);
+    return true;
+  },
 };
 
 // Create table when file loads
