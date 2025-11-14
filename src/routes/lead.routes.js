@@ -30,6 +30,17 @@ import {
 leadRoutes.get("/", authenticateToken, getAllLeads);
 
 /**
+ * GET /api/leads/all - Get all leads (for managers and admins)
+ * Access: Admin, Manager only
+ */
+leadRoutes.get(
+  "/all",
+  authenticateToken,
+  authorizeRole(["admin", "manager"]),
+  getAllLeads
+);
+
+/**
  * GET /api/leads/:id - Get specific lead by ID
  * Access: All authenticated users
  */
